@@ -1,0 +1,26 @@
+{
+  "name": "cli",
+  "version": "0.1.0",
+  "description": "CLI simples para gerar CRUDs NestJS a partir do Prisma",
+  "main": "./cli.js",
+  "bin": {
+    "cli": "./cli.js"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "node cli.js",
+    "link": "pnpm link --global",
+    "unlink": "pnpm unlink --global"
+  },
+  "keywords": ["nestjs", "cli", "crud", "prisma"],
+  "author": "caio.imperial",
+  "license": "ISC",
+  "packageManager": "pnpm@10.17.1",
+  "dependencies": {
+    "@prisma/client": "^6.16.3",
+    "commander": "^14.0.1",
+    "handlebars": "^4.7.8",
+    "inquirer": "^12.9.6",
+    "prisma": "^6.16.3"
+  }
+}
