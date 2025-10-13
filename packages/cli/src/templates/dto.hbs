@@ -1,0 +1,141 @@
+{{#with (collectValidators fields)}}
+import { {{#each validators}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} } from 'class-validator';
+{{#if needsType}}
+import { Type } from 'class-transformer';
+{{/if}}
+{{/with}}
+
+export class Create{{name.toPascalCase}}Dto {
+{{#each fields}}
+{{#unless (eq name "id")}}
+  {{#if optional}}
+  @IsOptional()
+  {{/if}}
+  {{#if (eq type "string")}}
+  @IsString()
+  @IsNotEmpty()
+  {{#if (eq name "email")}}
+  @IsEmail()
+  {{/if}}
+  {{#if (eq name "password")}}
+  @MinLength(8)
+  @IsStrongPassword()
+  {{/if}}
+  {{#if (eq name "name")}}
+  @MinLength(2)
+  @MaxLength(50)
+  {{/if}}
+  {{#if (eq name "title")}}
+  @MinLength(3)
+  @MaxLength(100)
+  {{/if}}
+  {{#if (eq name "description")}}
+  @MaxLength(500)
+  {{/if}}
+  {{#if (eq name "phone")}}
+  @IsPhoneNumber()
+  {{/if}}
+  {{#if (eq name "url")}}
+  @IsUrl()
+  {{/if}}
+  {{#if (eq name "slug")}}
+  @IsSlug()
+  {{/if}}
+  {{/if}}
+  {{#if (eq type "number")}}
+  @IsNumber()
+  {{#if (includes name "id")}}
+  @IsPositive()
+  {{/if}}
+  {{#if (eq name "count")}}
+  @Min(0)
+  {{/if}}
+  {{#if (eq name "price")}}
+  @IsPositive()
+  @IsDecimal({ decimal_digits: '2' })
+  {{/if}}
+  {{/if}}
+  {{#if (eq type "boolean")}}
+  @IsBoolean()
+  {{/if}}
+  {{#if (eq type "Date")}}
+  @IsDate()
+  @Type(() => Date)
+  {{/if}}
+  {{#if (eq type "any")}}
+  @IsObject()
+  {{/if}}
+  {{name}}{{#if optional}}?{{/if}}: {{type}};
+
+{{/unless}}
+{{/each}}
+}
+
+export class Update{{name.toPascalCase}}Dto {
+{{#each fields}}
+{{#unless (eq name "id")}}
+  @IsOptional()
+  {{#if (eq type "string")}}
+  @IsString()
+  {{#if (eq name "email")}}
+  @IsEmail()
+  {{/if}}
+  {{#if (eq name "password")}}
+  @MinLength(8)
+  @IsStrongPassword()
+  {{/if}}
+  {{#if (eq name "name")}}
+  @MinLength(2)
+  @MaxLength(50)
+  {{/if}}
+  {{#if (eq name "title")}}
+  @MinLength(3)
+  @MaxLength(100)
+  {{/if}}
+  {{#if (eq name "description")}}
+  @MaxLength(500)
+  {{/if}}
+  {{#if (eq name "phone")}}
+  @IsPhoneNumber()
+  {{/if}}
+  {{#if (eq name "url")}}
+  @IsUrl()
+  {{/if}}
+  {{#if (eq name "slug")}}
+  @IsSlug()
+  {{/if}}
+  {{/if}}
+  {{#if (eq type "number")}}
+  @IsNumber()
+  {{#if (includes name "id")}}
+  @IsPositive()
+  {{/if}}
+  {{#if (eq name "count")}}
+  @Min(0)
+  {{/if}}
+  {{#if (eq name "price")}}
+  @IsPositive()
+  @IsDecimal({ decimal_digits: '2' })
+  {{/if}}
+  {{/if}}
+  {{#if (eq type "boolean")}}
+  @IsBoolean()
+  {{/if}}
+  {{#if (eq type "Date")}}
+  @IsDate()
+  @Type(() => Date)
+  {{/if}}
+  {{#if (eq type "any")}}
+  @IsObject()
+  {{/if}}
+  {{name}}?: {{type}};
+
+{{/unless}}
+{{/each}}
+}
+
+export class {{name.toPascalCase}}ResponseDto {
+{{#each fields}}
+  {{name}}: {{type}};
+{{/each}}
+}

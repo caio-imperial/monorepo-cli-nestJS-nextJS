@@ -1,0 +1,13 @@
+export type FieldType = 'string' | 'number' | 'boolean' | 'date';
+
+export interface FieldConfig {
+  type: FieldType;
+  operators?: string[];
+}
+
+export type WhereConfig = Record<string, FieldConfig>;
+
+export interface FilterResult {
+  where: Record<string, any>;
+  errors: string[];
+}

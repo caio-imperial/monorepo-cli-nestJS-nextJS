@@ -53,3 +53,20 @@ export function toSnakeCase(str) {
     .replace(/\s+/g, "_") // espaços para "_"
     .toLowerCase();
 }
+
+/**
+ * Converte uma string para camelCase (nomeNome)
+ * @param {string} str
+ * @returns {string}
+ * @example
+ * toCamelCase("nome_nome") // "nomeNome"
+ */
+export function toCamelCase(str) {
+  const pascal = str
+    .replace(/[_-]+/g, " ") // transforma separadores em espaço
+    .replace(/\w+/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase())
+    .replace(/\s+/g, "");
+
+  // deixa a primeira letra minúscula
+  return pascal[0].toLowerCase() + pascal.slice(1);
+}

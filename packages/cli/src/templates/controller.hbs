@@ -1,0 +1,82 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  ParseIntPipe,
+  HttpStatus,
+  HttpCode,
+  Query,
+} from '@nestjs/common';
+import { {{name.toPascalCase}}Service } from './{{name.toKebabCase}}.service';
+import { Create{{name.toPascalCase}}Dto, Update{{name.toPascalCase}}Dto, {{name.toPascalCase}}ResponseDto  } from './{{name.toKebabCase}}.dto';
+import { PaginatedResponse } from '../common/types/pagination';
+
+@Controller('{{name.toKebabCase}}')
+export class {{name.toPascalCase}}Controller {
+  constructor(private readonly {{name.toCamelCase}}Service: {{name.toPascalCase}}Service) {}
+
+  {{#if crud}}
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() create{{name.toPascalCase}}Dto: Create{{name.toPascalCase}}Dto): Promise<{{name.toPascalCase}}ResponseDto> {
+    return this.{{name.toCamelCase}}Service.create(create{{name.toPascalCase}}Dto);
+  }
+
+  @Get()
+  async findAll(
+    @Query() query: Record<string, any>
+  ): Promise<PaginatedResponse<{{name.toPascalCase}}ResponseDto>> {
+    const { page = 1, limit = 10, sort, ...filters } = query;
+
+    // Remove pagination and sorting params from filters
+    const cleanFilters = Object.fromEntries(
+      Object.entries(filters).filter(([_, value]) => value !== undefined && value !== '')
+    );
+
+    if (Object.keys(cleanFilters).length === 0) {
+      return this.{{name.toCamelCase}}Service.findAllPaginated(Number(page), Number(limit), sort);
+    }
+
+    return this.{{name.toCamelCase}}Service.findByFiltersPaginated(cleanFilters, Number(page), Number(limit), sort);
+  }
+
+  @Get('count')
+  async count(): Promise<{ count: number }> {
+    const count = await this.{{name.toCamelCase}}Service.count();
+    return { count };
+  }
+
+  @Get('exists/:id')
+  async exists(
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<{ exists: boolean }> {
+    const exists = await this.{{name.toCamelCase}}Service.exists(id);
+    return { exists };
+  }
+
+  @Get(':id')
+  async findOne(
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<{{name.toPascalCase}}ResponseDto> {
+    return this.{{name.toCamelCase}}Service.findOne(id);
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() update{{name.toPascalCase}}Dto: Update{{name.toPascalCase}}Dto
+  ): Promise<{{name.toPascalCase}}ResponseDto> {
+    return this.{{name.toCamelCase}}Service.update(id, update{{name.toPascalCase}}Dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.{{name.toCamelCase}}Service.remove(id);
+  }
+  {{/if}}
+}

@@ -16,7 +16,9 @@ export function loadCliConfig() {
 
   // Normaliza caminhos relativos
   const basePath = path.resolve(projectRoot, config.basePath || 'src');
-  const templatesPath = path.resolve(projectRoot, config.templatesPath || 'templates');
-  const prismaPath = path.resolve(projectRoot, config.prismaPath || 'prisma');
+  const templatesPath = config.templatesPath
+    ? path.resolve(projectRoot, config.templatesPath)
+    : path.resolve(import.meta.dirname, '../templates');
+  const prismaPath = path.resolve(projectRoot, config.prismaPath || './prisma');
   return { projectRoot, basePath, templatesPath, prismaPath };
 }

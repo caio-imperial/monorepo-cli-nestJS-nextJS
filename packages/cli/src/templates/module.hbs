@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { {{name.toPascalCase}}Controller } from './{{name.toKebabCase}}.controller';
+import { {{name.toPascalCase}}Service } from './{{name.toKebabCase}}.service';
+import { {{name.toPascalCase}}Repository } from './{{name.toKebabCase}}.repository';
+import { PrismaModule } from '../prisma/prisma.module';
+
+@Module({
+  imports: [PrismaModule],
+  controllers: [{{name.toPascalCase}}Controller],
+  providers: [{{name.toPascalCase}}Service, {{name.toPascalCase}}Repository],
+  exports: [{{name.toPascalCase}}Service, {{name.toPascalCase}}Repository],
+})
+export class {{name.toPascalCase}}Module {}

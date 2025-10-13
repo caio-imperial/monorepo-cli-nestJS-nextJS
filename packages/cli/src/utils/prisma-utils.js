@@ -87,6 +87,7 @@ export function getModelFields(modelName) {
     return {
       name,
       type: tsType + (f.endsWith("[]") ? "[]" : ""),
+      prismaType: type, // Original Prisma type for filter config
       optional: isOptional,
     };
   });

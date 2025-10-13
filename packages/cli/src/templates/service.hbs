@@ -1,0 +1,75 @@
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { {{name.toPascalCase}}Repository } from './{{name.toKebabCase}}.repository';
+import { Create{{name.toPascalCase}}Dto, Update{{name.toPascalCase}}Dto } from './{{name.toKebabCase}}.dto';
+import { PaginatedResponse } from '../common/types/pagination';
+
+@Injectable()
+export class {{name.toPascalCase}}Service {
+  constructor(private readonly {{name.toCamelCase}}Repository: {{name.toPascalCase}}Repository) {}
+
+  {{#if crud}}
+  async create(create{{name.toPascalCase}}Dto: Create{{name.toPascalCase}}Dto) {
+    try {
+      return await this.{{name.toCamelCase}}Repository.create(create{{name.toPascalCase}}Dto);
+    } catch (error: any) {
+      console.error(`Failed to create {{name.normal}}: ${error.message}`)
+      throw new BadRequestException(`Failed to create {{name.normal}}`);
+    }
+  }
+
+  async findAllPaginated(page: number = 1, limit: number = 10, sort?: string): Promise<PaginatedResponse<any>> {
+    return this.{{name.toCamelCase}}Repository.findAllPaginated(page, limit, sort);
+  }
+
+  async findOne(id: number) {
+    const {{name.toCamelCase}} = await this.{{name.toCamelCase}}Repository.findOne(id);
+    if (!{{name.toCamelCase}}) {
+      console.error(`{{name.normal}} with ID ${id} not found`);
+      throw new NotFoundException(`{{name.normal}} not found`);
+    }
+    return {{name.toCamelCase}};
+  }
+
+  async update(id: number, update{{name.toPascalCase}}Dto: Update{{name.toPascalCase}}Dto) {
+    await this.findOne(id); // Validates existence
+
+    try {
+      return await this.{{name.toCamelCase}}Repository.update(id, update{{className}}Dto);
+    } catch (error: any) {
+      console.error(`Failed to update {{name.normal}}: ${error.message}`);
+      throw new BadRequestException(`Failed to update {{name.normal}}`);
+    }
+  }
+
+  async remove(id: number) {
+    await this.findOne(id); // Validates existence
+
+    try {
+      return await this.{{name.toCamelCase}}Repository.remove(id);
+    } catch (error: any) {
+      console.error(`Failed to remove {{name.normal}}: ${error.message}`)
+      throw new BadRequestException(`Failed to remove {{name.normal}}`);
+    }
+  }
+
+  async findByFieldPaginated(field: string, value: any, page: number = 1, limit: number = 10): Promise<PaginatedResponse<any>> {
+    return this.{{name.toCamelCase}}Repository.findByFieldPaginated(field, value, page, limit);
+  }
+
+  async findByFilters(filters: Record<string, any>) {
+    return this.{{name.toCamelCase}}Repository.findByFilters(filters);
+  }
+
+  async findByFiltersPaginated(filters: Record<string, any>, page: number = 1, limit: number = 10, sort?: string): Promise<PaginatedResponse<any>> {
+    return this.{{name.toCamelCase}}Repository.findByFiltersPaginated(filters, page, limit, sort);
+  }
+
+  async count() {
+    return this.{{name.toCamelCase}}Repository.count();
+  }
+
+  async exists(id: number): Promise<boolean> {
+    return this.{{name.toCamelCase}}Repository.exists(id);
+  }
+  {{/if}}
+}

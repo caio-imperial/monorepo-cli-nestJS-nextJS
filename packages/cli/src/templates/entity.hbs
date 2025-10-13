@@ -1,0 +1,11 @@
+export class {{className}} {
+  {{#each fields}}
+  {{name}}{{#if optional}}?{{/if}}: {{type}};
+  {{/each}}
+
+  constructor(data?: Partial<{{className}}>) {
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
+}

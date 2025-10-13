@@ -1,0 +1,205 @@
+import { FieldType, FieldConfig, WhereConfig, FilterResult } from '../types/filter.types';
+
+export class FilterUtils {
+  /**
+   * Constrói cláusula WHERE avançada com operadores Prisma
+   */
+  static buildWhereClause(
+    filters: Record<string, any>,
+    config: WhereConfig
+  ): Record<string, any> {
+    const where: Record<string, any> = {};
+
+    Object.entries(filters).forEach(([rawKey, rawValue]) => {
+      if (rawValue === undefined || rawValue === null || rawValue === '') return;
+
+      const [key, operator] = rawKey.split('_');
+      const fieldConfig = config[key];
+
+      // Ignora campos não permitidos
+      if (!fieldConfig) return;
+
+      const { type, operators = [] } = fieldConfig;
+      let value: any = rawValue;
+
+      // Conversão de tipo segura
+      switch (type) {
+        case 'boolean':
+          if (value === 'true') value = true;
+          else if (value === 'false') value = false;
+          else return; // valor inválido
+          break;
+
+        case 'number':
+          const num = Number(value);
+          if (isNaN(num)) return;
+          value = num;
+          break;
+
+        case 'date':
+          const date = new Date(value);
+          if (isNaN(date.getTime())) return;
+          value = date;
+          break;
+
+        case 'string':
+        default:
+          value = String(value);
+          break;
+      }
+
+      // Tratamento do operador
+      if (operator) {
+        // Operador permitido?
+        if (!operators.includes(operator)) return;
+
+        if (!where[key]) where[key] = {};
+
+        switch (operator) {
+          case 'contains':
+          case 'startsWith':
+          case 'endsWith':
+          case 'gte':
+          case 'lte':
+          case 'gt':
+          case 'lt':
+          case 'not':
+            where[key][operator] = value;
+            break;
+
+          case 'in':
+            where[key][operator] = String(value)
+              .split(',')
+              .map((v) => v.trim());
+            break;
+
+          default:
+            return;
+        }
+      } else {
+        // Sem operador → igualdade
+        where[key] = value;
+      }
+    });
+
+    return where;
+  }
+
+  /**
+   * Versão com validação detalhada e relatório de erros
+   */
+  static buildWhereClauseWithValidation(
+    filters: Record<string, any>,
+    config: WhereConfig
+  ): FilterResult {
+    const where: Record<string, any> = {};
+    const errors: string[] = [];
+
+    Object.entries(filters).forEach(([rawKey, rawValue]) => {
+      if (rawValue === undefined || rawValue === null || rawValue === '') return;
+
+      const [key, operator] = rawKey.split('_');
+      const fieldConfig = config[key];
+
+      if (!fieldConfig) {
+        errors.push(`Field '${key}' is not allowed`);
+        return;
+      }
+
+      const { type, operators = [] } = fieldConfig;
+
+      if (operator && !operators.includes(operator)) {
+        errors.push(`Operator '${operator}' is not allowed for field '${key}'`);
+        return;
+      }
+
+      let value: any = rawValue;
+
+      // Conversão de tipo segura com validação
+      switch (type) {
+        case 'boolean':
+          if (value === 'true') value = true;
+          else if (value === 'false') value = false;
+          else {
+            errors.push(`Invalid boolean value '${rawValue}' for field '${key}'`);
+            return;
+          }
+          break;
+
+        case 'number':
+          const num = Number(value);
+          if (isNaN(num)) {
+            errors.push(`Invalid number value '${rawValue}' for field '${key}'`);
+            return;
+          }
+          value = num;
+          break;
+
+        case 'date':
+          const date = new Date(value);
+          if (isNaN(date.getTime())) {
+            errors.push(`Invalid date value '${rawValue}' for field '${key}'`);
+            return;
+          }
+          value = date;
+          break;
+
+        case 'string':
+        default:
+          value = String(value);
+          break;
+      }
+
+      // Aplicar operador
+      if (operator) {
+        if (!where[key]) where[key] = {};
+
+        switch (operator) {
+          case 'contains':
+          case 'startsWith':
+          case 'endsWith':
+          case 'gte':
+          case 'lte':
+          case 'gt':
+          case 'lt':
+          case 'not':
+            where[key][operator] = value;
+            break;
+
+          case 'in':
+            where[key][operator] = String(value)
+              .split(',')
+              .map((v) => v.trim());
+            break;
+
+          default:
+            errors.push(`Unknown operator '${operator}' for field '${key}'`);
+            return;
+        }
+      } else {
+        where[key] = value;
+      }
+    });
+
+    return { where, errors };
+  }
+
+  /**
+   * Remove filtros vazios de um objeto
+   */
+  static cleanFilters(filters: Record<string, any>): Record<string, any> {
+    return Object.fromEntries(
+      Object.entries(filters).filter(([_, value]) =>
+        value !== undefined && value !== null && value !== ''
+      )
+    );
+  }
+
+  /**
+   * Valida se pelo menos um filtro foi fornecido
+   */
+  static hasValidFilters(filters: Record<string, any>): boolean {
+    const cleaned = this.cleanFilters(filters);
+    return Object.keys(cleaned).length > 0;
+  }
+}

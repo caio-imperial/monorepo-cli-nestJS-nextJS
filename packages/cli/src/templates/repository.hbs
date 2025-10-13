@@ -1,0 +1,159 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { Create{{name.toPascalCase}}Dto, Update{{name.toPascalCase}}Dto } from './{{name.toKebabCase}}.dto';
+import { PaginatedResponse } from '../common/types/pagination';
+import { FilterUtils } from '../common/utils/filter.utils';
+import { WhereConfig } from '../common/types/filter.types';
+
+@Injectable()
+export class {{name.toPascalCase}}Repository {
+  private readonly filterConfig: WhereConfig = {
+{{{generateFilterConfig fields}}}
+  };
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(data: Create{{className}}Dto) {
+    return this.prisma.{{name.toCamelCase}}.create({
+      data,
+    });
+  }
+
+  async findOne(id: number) {
+    return this.prisma.{{name.toCamelCase}}.findUnique({
+      where: { id },
+    });
+  }
+
+  async update(id: number, data: Update{{name.toPascalCase}}Dto) {
+    return this.prisma.{{name.toCamelCase}}.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async remove(id: number) {
+    return this.prisma.{{name.toCamelCase}}.delete({
+      where: { id },
+    });
+  }
+
+  async findAllPaginated(page: number = 1, limit: number = 10, sort?: string): Promise<PaginatedResponse<any>> {
+    const skip = (page - 1) * limit;
+    const orderBy = this.buildOrderBy(sort);
+
+    const [data, total] = await Promise.all([
+      this.prisma.{{name.toCamelCase}}.findMany({
+        skip,
+        take: limit,
+        orderBy,
+      }),
+      this.prisma.{{name.toCamelCase}}.count()
+    ]);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1
+      }
+    };
+  }
+
+  async findByFieldPaginated(field: string, value: any, page: number = 1, limit: number = 10): Promise<PaginatedResponse<any>> {
+    const skip = (page - 1) * limit;
+    const where = { [field]: value };
+
+    const [data, total] = await Promise.all([
+      this.prisma.{{name.toCamelCase}}.findMany({
+        where,
+        skip,
+        take: limit,
+      }),
+      this.prisma.{{name.toCamelCase}}.count({ where })
+    ]);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1
+      }
+    };
+  }
+
+  async findByFilters(filters: Record<string, any>) {
+    return this.prisma.{{name.toCamelCase}}.findMany({
+      where: this.buildWhereClause(filters)
+    });
+  }
+
+  async findByFiltersPaginated(filters: Record<string, any>, page: number = 1, limit: number = 10, sort?: string): Promise<PaginatedResponse<any>> {
+    const skip = (page - 1) * limit;
+    const where = this.buildWhereClause(filters);
+    const orderBy = this.buildOrderBy(sort);
+
+    const [data, total] = await Promise.all([
+      this.prisma.{{name.toCamelCase}}.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+      }),
+      this.prisma.{{name.toCamelCase}}.count({ where })
+    ]);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1
+      }
+    };
+  }
+
+  async count() {
+    return this.prisma.{{name.toCamelCase}}.count();
+  }
+
+  async exists(id: number): Promise<boolean> {
+    const count = await this.prisma.{{name.toCamelCase}}.count({
+      where: { id },
+    });
+    return count > 0;
+  }
+
+  private buildWhereClause(filters: Record<string, any>) {
+    return FilterUtils.buildWhereClause(filters, this.filterConfig);
+  }
+
+  private buildWhereClauseWithValidation(filters: Record<string, any>) {
+    return FilterUtils.buildWhereClauseWithValidation(filters, this.filterConfig);
+  }
+
+  private buildOrderBy(sort?: string): any {
+    if (!sort) return { id: 'asc' };
+
+    // Support formats like: "name:desc", "age:asc", "createdAt:desc"
+    const [field, direction = 'asc'] = sort.split(':');
+    const validDirections = ['asc', 'desc'];
+
+    if (!validDirections.includes(direction.toLowerCase())) {
+      return { id: 'asc' };
+    }
+
+    return { [field]: direction.toLowerCase() };
+  }
+}
