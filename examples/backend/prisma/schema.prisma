@@ -1,0 +1,80 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // ou "mysql" | "sqlite" | "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int               @id @default(autoincrement())
+  name        String
+  email       String             @unique
+  password    String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  // relação
+  collection  CollectionItem[]
+}
+
+model Car {
+  id              Int               @id @default(autoincrement())
+  name            String
+  model           String?           // ex: "Lamborghini Huracán LP 610-4"
+  color           String?
+  year            Int?              // ano de lançamento
+  collectorNumber String?           // número da coleção
+  castingId       String?           // ID original do molde (caso queira cruzar com catálogos oficiais)
+  releaseDate     DateTime?         // data de lançamento
+  imageUrl        String?           // imagem de referência
+  description     String?
+
+  // relações
+  seriesId        Int?
+  series          Series?           @relation(fields: [seriesId], references: [id])
+
+  brandId         Int?
+  brand           Brand?            @relation(fields: [brandId], references: [id])
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  collectionItems CollectionItem[]
+}
+
+model Series {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique          // ex: "Mainline", "Premium", "Super Treasure Hunt"
+  year      Int?
+  cars      Car[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Brand {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique          // ex: "Hot Wheels", "Matchbox", "RLC"
+  cars      Car[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CollectionItem {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  carId       Int
+  acquiredAt  DateTime? @default(now())
+  condition   String?   // "New", "Opened", "Mint", etc.
+  notes       String?
+  quantity    Int       @default(1)
+  favorite    Boolean   @default(false)
+
+  user        User      @relation(fields: [userId], references: [id])
+  car         Car       @relation(fields: [carId], references: [id])
+
+  @@unique([userId, carId]) // evita duplicidade de miniaturas no mesmo user
+}
