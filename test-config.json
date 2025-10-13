@@ -1,5 +1,0 @@
-{
-  "basePath": "src",
-  "templatesPath": "packages/cli/src/templates",
-  "prismaPath": "prisma"
-}
