@@ -6,21 +6,29 @@
   "bin": {
     "cli": "./cli.js"
   },
-  "type": "module",
   "scripts": {
     "start": "node cli.js",
     "link": "pnpm link --global",
-    "unlink": "pnpm unlink --global"
+    "unlink": "pnpm unlink --global",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
-  "keywords": ["nestjs", "cli", "crud", "prisma"],
+  "keywords": [
+    "nestjs",
+    "cli",
+    "crud",
+    "prisma"
+  ],
   "author": "caio.imperial",
   "license": "ISC",
   "packageManager": "pnpm@10.17.1",
   "dependencies": {
-    "@prisma/client": "^6.16.3",
+    "@prisma/client": "^6.17.1",
+    "change-case": "^5.4.4",
     "commander": "^14.0.1",
     "handlebars": "^4.7.8",
-    "inquirer": "^12.9.6",
-    "prisma": "^6.16.3"
+    "inquirer": "^12.10.0",
+    "prisma": "^6.17.1"
   }
 }

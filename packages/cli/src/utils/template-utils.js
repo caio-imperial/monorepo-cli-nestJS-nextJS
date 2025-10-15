@@ -104,19 +104,29 @@ function getDefaultOperatorsForType(type) {
 
 // Helper para gerar configuração de filtros
 Handlebars.registerHelper('generateFilterConfig', function(fields) {
-  return fields
-    .filter(field => field.name !== 'id')
+  return fields.filter(field => field.name !== 'id' && field.type !== 'boolean' )
     .map(field => {
       const prismaType = field.prismaType || field.type;
       const fieldType = mapPrismaTypeToFieldType(prismaType);
       const operators = getDefaultOperatorsForType(prismaType);
       const operatorsStr = operators.length > 0
         ? `operators: [${operators.map(op => `'${op}'`).join(', ')}]`
-        : '// No operators for boolean';
+        : null;
+
+      if (!operatorsStr) return null
 
       return `    ${field.name}: { type: '${fieldType}', ${operatorsStr} }`;
     })
     .join(',\n');
+});
+
+// Helper para gerar tipo correto para Response DTO
+Handlebars.registerHelper('responseFieldType', function(field) {
+  let type = field.type;
+  if (field.optional) {
+    return `${type} | null`;
+  }
+  return type;
 });
 
 /**

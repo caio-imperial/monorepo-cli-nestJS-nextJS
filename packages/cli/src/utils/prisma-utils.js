@@ -61,7 +61,33 @@ export function getModelFields(modelName) {
   const fieldsRaw = modelMatch[1]
     .split("\n")
     .map((f) => f.trim())
-    .filter((f) => f && !f.startsWith("//"));
+    .filter((f) => f && !f.startsWith("//"))
+    .filter((f) => {
+      const trimmed = f.trim();
+
+      // Ignorar linhas que contêm @relation (objetos de relação)
+      if (trimmed.includes('@relation')) {
+        return false;
+      }
+
+      // Ignorar constraints e anotações especiais do Prisma (@@unique, @@index, etc.)
+      if (trimmed.startsWith('@@')) {
+        return false;
+      }
+
+      // Ignorar arrays de modelos (ex: orders Order[])
+      // Mas manter arrays primitivos (String[], Int[], etc.)
+      const [fieldName, fieldType] = trimmed.split(/\s+/);
+      if (fieldType && fieldType.endsWith('[]')) {
+        const baseType = fieldType.slice(0, -2);
+        const primitiveTypes = ['String', 'Int', 'Float', 'Boolean', 'DateTime', 'Decimal'];
+        if (!primitiveTypes.includes(baseType)) {
+          return false; // É um array de modelo, ignorar
+        }
+      }
+
+      return true;
+    });
 
   const fields = fieldsRaw.map((f) => {
     // Captura name e type (considerando arrays e opcionalidade)

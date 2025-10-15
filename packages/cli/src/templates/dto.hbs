@@ -136,6 +136,6 @@ export class Update{{name.toPascalCase}}Dto {
 
 export class {{name.toPascalCase}}ResponseDto {
 {{#each fields}}
-  {{name}}: {{type}};
+  {{name}}{{#if optional}}?{{/if}}: {{type}}{{#if optional}} | null{{/if}};
 {{/each}}
 }

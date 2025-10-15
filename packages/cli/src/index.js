@@ -2,15 +2,15 @@ import path from "path";
 import fs from "fs";
 import { ensureDir, writeFile } from "./utils/fs-utils.js";
 import { renderTemplate } from "./utils/template-utils.js";
-import { capitalize, toKebabCase, toCamelCase, toSnakeCase, toPascalCase } from "./utils/string-utils.js";
 import { loadCliConfig } from "./utils/config-utils.js";
 import { getModelFields } from "./utils/prisma-utils.js";
+import { camelCase, pascalCase, snakeCase, kebabCase } from "change-case";
 
 export async function main(name, options = {}) {
   const config = loadCliConfig();
 
   const basePath = config.basePath;
-  const baseDir = path.join(basePath, toKebabCase(name));
+  const baseDir = path.join(basePath, kebabCase(name));
   const commonTypesDir = path.join(basePath, "common", "types");
   const commonUtilsDir = path.join(basePath, "common", "utils");
 
@@ -22,13 +22,12 @@ export async function main(name, options = {}) {
   const context = {
     name: {
       normal: name,
-      toKebabCase: toKebabCase(name),
-      capitalize: capitalize(name),
-      toPascalCase: toPascalCase(name),
-      toSnakeCase: toSnakeCase(name),
-      toCamelCase: toCamelCase(name)
+      toKebabCase: kebabCase(name),
+      toPascalCase: pascalCase(name),
+      toSnakeCase: snakeCase(name),
+      toCamelCase: camelCase(name)
     },
-    className: capitalize(name),
+    className: name,
     crud: options.crud || false,
     fields: await getModelFields(name),
   };
@@ -80,7 +79,7 @@ export interface PaginationMeta {
 
   for (const type of templates) {
     const content = renderTemplate(type, context);
-    const fileName = `${toKebabCase(name)}.${type}.ts`
+    const fileName = `${kebabCase(name)}.${type}.ts`
     const filePath = path.join(baseDir, fileName);
     await writeFile(filePath, content);
     console.log(`✅ ${type} para "${name}" gerado em ${fileName}`);
