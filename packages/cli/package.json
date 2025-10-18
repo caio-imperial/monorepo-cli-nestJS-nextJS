@@ -6,6 +6,7 @@
   "bin": {
     "cli": "./cli.js"
   },
+  "type": "module", 
   "scripts": {
     "start": "node cli.js",
     "link": "pnpm link --global",

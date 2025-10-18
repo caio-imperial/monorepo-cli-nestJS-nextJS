@@ -4,6 +4,9 @@ import { {{#each validators}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} } f
 import { Type } from 'class-transformer';
 {{/if}}
 {{/with}}
+{{#if swaggerEnabled}}
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+{{/if}}
 
 export class Create{{name.toPascalCase}}Dto {
 {{#each fields}}
@@ -64,6 +67,19 @@ export class Create{{name.toPascalCase}}Dto {
   {{/if}}
   {{#if (eq type "any")}}
   @IsObject()
+  {{/if}}
+  {{#if ../swaggerEnabled}}
+  {{#if optional}}
+  @ApiPropertyOptional({
+    description: '{{description name}}',
+    example: {{{example type name}}}
+  })
+  {{else}}
+  @ApiProperty({
+    description: '{{description name}}',
+    example: {{{example type name}}}
+  })
+  {{/if}}
   {{/if}}
   {{name}}{{#if optional}}?{{/if}}: {{type}};
 
@@ -128,6 +144,12 @@ export class Update{{name.toPascalCase}}Dto {
   {{#if (eq type "any")}}
   @IsObject()
   {{/if}}
+  {{#if ../swaggerEnabled}}
+  @ApiPropertyOptional({
+    description: '{{description name}}',
+    example: {{{example type name}}}
+  })
+  {{/if}}
   {{name}}?: {{type}};
 
 {{/unless}}
@@ -136,6 +158,21 @@ export class Update{{name.toPascalCase}}Dto {
 
 export class {{name.toPascalCase}}ResponseDto {
 {{#each fields}}
+  {{#if ../swaggerEnabled}}
+  {{#if optional}}
+  @ApiPropertyOptional({
+    description: '{{description name}}',
+    example: {{{example type name}}},
+    nullable: true
+  })
+  {{else}}
+  @ApiProperty({
+    description: '{{description name}}',
+    example: {{{example type name}}}
+  })
+  {{/if}}
+  {{/if}}
   {{name}}{{#if optional}}?{{/if}}: {{type}}{{#if optional}} | null{{/if}};
+
 {{/each}}
 }

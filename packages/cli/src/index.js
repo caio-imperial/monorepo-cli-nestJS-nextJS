@@ -30,7 +30,9 @@ export async function main(name, options = {}) {
     className: name,
     crud: options.crud || false,
     fields: await getModelFields(name),
+    swaggerEnabled: config.swagger === true,
   };
+
 
   // Create common pagination types file if it doesn't exist
   const paginationTypesPath = path.join(commonTypesDir, "pagination.ts");
@@ -73,6 +75,22 @@ export interface PaginationMeta {
     const filterUtilsContent = renderTemplate("filter.utils", context);
     await writeFile(filterUtilsPath, filterUtilsContent);
     console.log(`✅ common filter utils criado em common/utils/filter.utils.ts`);
+  }
+
+  // Create Swagger configuration file if enabled and doesn't exist
+  if (config.swagger === true) {
+    const swaggerConfigPath = path.join(basePath, "config", "swagger.config.ts");
+    const swaggerConfigDir = path.join(basePath, "config");
+    await ensureDir(swaggerConfigDir);
+
+    if (!fs.existsSync(swaggerConfigPath)) {
+      const swaggerConfigContent = renderTemplate("swagger.config", context);
+      await writeFile(swaggerConfigPath, swaggerConfigContent);
+      console.log(`✅ Swagger configuration criado em config/swagger.config.ts`);
+    }
+    console.log(`✅ Swagger documentation: ENABLED`);
+  } else {
+    console.log(`ℹ️  Swagger documentation: DISABLED`);
   }
 
   const templates = ["controller", "service", "repository", "module", "dto"];

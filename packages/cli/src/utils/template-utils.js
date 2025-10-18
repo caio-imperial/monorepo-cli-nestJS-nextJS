@@ -129,6 +129,91 @@ Handlebars.registerHelper('responseFieldType', function(field) {
   return type;
 });
 
+// Helper para gerar descrição do campo para Swagger
+Handlebars.registerHelper('description', function(fieldName) {
+  const descriptions = {
+    id: 'Unique identifier',
+    name: 'Name of the entity',
+    title: 'Title of the entity',
+    email: 'Email address',
+    phone: 'Phone number',
+    password: 'User password',
+    age: 'Age in years',
+    price: 'Price value',
+    quantity: 'Quantity amount',
+    description: 'Detailed description',
+    content: 'Content text',
+    url: 'URL address',
+    imageUrl: 'Image URL',
+    slug: 'URL-friendly identifier',
+    status: 'Current status',
+    active: 'Active status',
+    favorite: 'Favorite flag',
+    notes: 'Additional notes',
+    condition: 'Current condition',
+    createdAt: 'Creation timestamp',
+    updatedAt: 'Last update timestamp',
+    userId: 'User identifier',
+    carId: 'Car identifier',
+    brandId: 'Brand identifier',
+    seriesId: 'Series identifier'
+  };
+  return descriptions[fieldName] || `${fieldName} field`;
+});
+
+// Helper para gerar exemplos baseados no tipo para Swagger
+Handlebars.registerHelper('example', function(type, fieldName) {
+  const stringExamples = {
+    name: "'John Doe'",
+    title: "'Sample Title'",
+    email: "'user@example.com'",
+    phone: "'+1234567890'",
+    password: "'mySecurePassword123'",
+    description: "'This is a sample description'",
+    content: "'Sample content text'",
+    url: "'https://example.com'",
+    imageUrl: "'https://example.com/image.jpg'",
+    slug: "'sample-slug'",
+    status: "'active'",
+    notes: "'Additional notes here'",
+    condition: "'excellent'",
+    color: "'red'",
+    model: "'BMW X5'",
+    collectorNumber: "'HW001'",
+    castingId: "'C123456'"
+  };
+
+  const numberExamples = {
+    id: "1",
+    age: "25",
+    price: "99.99",
+    quantity: "5",
+    year: "2023",
+    userId: "1",
+    carId: "1",
+    brandId: "1",
+    seriesId: "1"
+  };
+
+  if (type === 'string') {
+    return stringExamples[fieldName] || "'example text'";
+  }
+
+  if (type === 'number') {
+    return numberExamples[fieldName] || "123";
+  }
+
+  if (type === 'boolean') {
+    return fieldName === 'active' ? 'true' : 'false';
+  }
+
+  if (type === 'Date') {
+    return "'2023-12-01T00:00:00Z'";
+  }
+
+  return "'example'";
+});
+
 /**
  * Renderiza um template Handlebars do projeto atual.
  */

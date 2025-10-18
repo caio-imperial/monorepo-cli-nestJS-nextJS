@@ -15,10 +15,11 @@ export function loadCliConfig() {
   const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
   // Normaliza caminhos relativos
+  const swagger = config.swagger
   const basePath = path.resolve(projectRoot, config.basePath || 'src');
   const templatesPath = config.templatesPath
     ? path.resolve(projectRoot, config.templatesPath)
     : path.resolve(import.meta.dirname, '../templates');
   const prismaPath = path.resolve(projectRoot, config.prismaPath || './prisma');
-  return { projectRoot, basePath, templatesPath, prismaPath };
+  return { projectRoot, basePath, templatesPath, prismaPath, swagger };
 }

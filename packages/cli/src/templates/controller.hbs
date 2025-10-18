@@ -11,22 +11,62 @@ import {
   HttpCode,
   Query,
 } from '@nestjs/common';
+{{#if swaggerEnabled}}
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBody,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse
+} from '@nestjs/swagger';
+{{/if}}
 import { {{name.toPascalCase}}Service } from './{{name.toKebabCase}}.service';
 import { Create{{name.toPascalCase}}Dto, Update{{name.toPascalCase}}Dto, {{name.toPascalCase}}ResponseDto  } from './{{name.toKebabCase}}.dto';
 import { PaginatedResponse } from '../common/types/pagination';
 
 @Controller('{{name.toKebabCase}}')
+{{#if swaggerEnabled}}
+@ApiTags('{{name.toKebabCase}}')
+{{/if}}
 export class {{name.toPascalCase}}Controller {
   constructor(private readonly {{name.toCamelCase}}Service: {{name.toPascalCase}}Service) {}
 
   {{#if crud}}
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  {{#if swaggerEnabled}}
+  @ApiOperation({ summary: 'Create a new {{name.toKebabCase}}' })
+  @ApiBody({ type: Create{{name.toPascalCase}}Dto })
+  @ApiResponse({ status: 201, description: 'Successfully created', type: {{name.toPascalCase}}ResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid input data' })
+  {{/if}}
   async create(@Body() create{{name.toPascalCase}}Dto: Create{{name.toPascalCase}}Dto): Promise<{{name.toPascalCase}}ResponseDto> {
     return this.{{name.toCamelCase}}Service.create(create{{name.toPascalCase}}Dto);
   }
 
   @Get()
+  {{#if swaggerEnabled}}
+  @ApiOperation({ summary: 'Get all {{name.toKebabCase}}s with pagination and filters' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+  @ApiQuery({ name: 'sort', required: false, type: String, description: 'Sort by field:direction (e.g., name:asc)' })
+  {{/if}}
+  {{#if swaggerEnabled}}
+{{#each fields}}
+{{#unless (eq name "id")}}
+  @ApiQuery({ name: '{{name}}', required: false, type: String, description: 'Filter by {{name}}' })
+{{/unless}}
+{{/each}}
+  @ApiOkResponse({
+    status: 200,
+    description: 'List retrieved successfully',
+    type: 'PaginatedResponse<{{name.toPascalCase}}ResponseDto>'
+  })
+  {{/if}}
   async findAll(
     @Query() query: Record<string, any>
   ): Promise<PaginatedResponse<{{name.toPascalCase}}ResponseDto>> {
@@ -45,12 +85,21 @@ export class {{name.toPascalCase}}Controller {
   }
 
   @Get('count')
+  {{#if swaggerEnabled}}
+  @ApiOperation({ summary: 'Get total count of {{name.toKebabCase}}s' })
+  @ApiOkResponse({ status: 200, description: 'Total count retrieved', schema: { properties: { count: { type: 'number' } } } })
+  {{/if}}
   async count(): Promise<{ count: number }> {
     const count = await this.{{name.toCamelCase}}Service.count();
     return { count };
   }
 
   @Get('exists/:id')
+  {{#if swaggerEnabled}}
+  @ApiOperation({ summary: 'Check if {{name.toKebabCase}} exists by ID' })
+  @ApiParam({ name: 'id', type: Number, description: '{{name.toPascalCase}} ID' })
+  @ApiOkResponse({ status: 200, description: 'Existence check result', schema: { properties: { exists: { type: 'boolean' } } } })
+  {{/if}}
   async exists(
     @Param('id', ParseIntPipe) id: number
   ): Promise<{ exists: boolean }> {
@@ -59,6 +108,12 @@ export class {{name.toPascalCase}}Controller {
   }
 
   @Get(':id')
+  {{#if swaggerEnabled}}
+  @ApiOperation({ summary: 'Get {{name.toKebabCase}} by ID' })
+  @ApiParam({ name: 'id', type: Number, description: '{{name.toPascalCase}} ID' })
+  @ApiOkResponse({ status: 200, description: 'Record found', type: {{name.toPascalCase}}ResponseDto })
+  @ApiNotFoundResponse({ description: '{{name.toPascalCase}} not found' })
+  {{/if}}
   async findOne(
     @Param('id', ParseIntPipe) id: number
   ): Promise<{{name.toPascalCase}}ResponseDto> {
@@ -66,6 +121,14 @@ export class {{name.toPascalCase}}Controller {
   }
 
   @Put(':id')
+  {{#if swaggerEnabled}}
+  @ApiOperation({ summary: 'Update {{name.toKebabCase}} by ID' })
+  @ApiParam({ name: 'id', type: Number, description: '{{name.toPascalCase}} ID' })
+  @ApiBody({ type: Update{{name.toPascalCase}}Dto })
+  @ApiOkResponse({ status: 200, description: 'Successfully updated', type: {{name.toPascalCase}}ResponseDto })
+  @ApiNotFoundResponse({ description: '{{name.toPascalCase}} not found' })
+  @ApiBadRequestResponse({ description: 'Invalid input data' })
+  {{/if}}
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() update{{name.toPascalCase}}Dto: Update{{name.toPascalCase}}Dto
@@ -75,6 +138,12 @@ export class {{name.toPascalCase}}Controller {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  {{#if swaggerEnabled}}
+  @ApiOperation({ summary: 'Delete {{name.toKebabCase}} by ID' })
+  @ApiParam({ name: 'id', type: Number, description: '{{name.toPascalCase}} ID' })
+  @ApiResponse({ status: 204, description: 'Successfully deleted' })
+  @ApiNotFoundResponse({ description: '{{name.toPascalCase}} not found' })
+  {{/if}}
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.{{name.toCamelCase}}Service.remove(id);
   }
